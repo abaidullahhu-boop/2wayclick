@@ -1,26 +1,405 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   2wayclick design tokens — a LIGHT-ONLY system.
+   There is deliberately no `prefers-color-scheme: dark` block: the brand is a
+   warm-white canvas with a single orange accent, and the one dark surface on
+   the site (the CTA panel) is a fixed brand colour, not a theme.
+
+   Contrast ratios in the comments below were measured against the DEEPEST
+   background each token can land on (--bg-tertiary #efece5), not the lightest,
+   because that is the failing case.
+   ========================================================================= */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* --- Accent: warm orange family -------------------------------------- */
+  --accent-orange: #ff5a1f; /* primary brand orange */
+  --accent-amber: #ffa552; /* light end of the ramp */
+  --accent-red: #d9381e; /* dark end of the ramp */
+  --accent-tint: #fff4ed; /* faintest orange wash */
+  --accent-tint-2: #ffe8d9; /* soft orange wash */
+
+  /* --- Light surfaces ---------------------------------------------------- */
+  --bg-primary: #fdfcfa; /* warm off-white, the page background */
+  --bg-secondary: #f7f5f0; /* light sand */
+  --bg-tertiary: #efece5; /* deeper sand */
+
+  /* --- Dark surfaces ----------------------------------------------------- */
+  --bg-dark: #0a0a0a;
+  --bg-dark-2: #141414;
+  --bg-dark-3: #1c1c1c;
+
+  /* --- Text -------------------------------------------------------------- */
+  --text-primary: #12100e; /* 16.09:1 on --bg-tertiary, the deepest light band */
+  --text-secondary: #38332d; /* 10.60:1 on --bg-tertiary */
+  --text-muted: #6e6862; /* 4.66:1 on --bg-tertiary — clears AA with little margin, do not lighten */
+  --text-faint: #9c958d; /* 2.51:1 — DECORATIVE ONLY, never the sole carrier of meaning */
+  --text-on-dark: #ffffff; /* 17.04:1 on --bg-dark-3 */
+  --text-on-dark-muted: #a1a1a1; /* 6.60:1 on --bg-dark-3 */
+
+  /* --- Borders ----------------------------------------------------------- */
+  --border-subtle: #e4e0d8;
+  --border-strong: #12100e;
+
+  /* ----------------------------------------------------------------------
+     Semantic aliases.
+     Components address these rather than the raw palette, so a palette swap
+     is a change here and nowhere else.
+
+     NOTE ON ORANGE: --accent-orange is only 2.64–3.04:1 on the light bands,
+     so it FAILS AA for body text. It is a fill/large-display colour. Anything
+     text-sized on a light surface uses --accent-red (4.52:1 on --bg-primary).
+     On the dark surfaces orange is 5.47:1+ and safe for text.
+     ------------------------------------------------------------------- */
+  --accent: var(--accent-orange); /* fills, rules, large display only */
+  --accent-deep: var(--accent-red); /* the text-safe accent on light bands */
+  --accent-light: var(--accent-amber);
+  --accent-glow: var(--accent-tint-2);
+
+  --canvas: var(--bg-primary);
+  --canvas-alt: var(--bg-secondary);
+  --canvas-deep: var(--bg-tertiary);
+  --surface: #ffffff; /* cards sit brighter than the warm page */
+  --surface-tint: var(--accent-tint);
+
+  --text: var(--text-primary);
+  --text-2: var(--text-secondary);
+  --text-dim: var(--text-faint);
+  --text-disabled: var(--text-muted); /* AA on every light band it can land on */
+
+  --border: var(--border-subtle);
+
+  /* The single dark surface on the site (the CTA panel). */
+  --ink: var(--bg-dark);
+  --ink-2: var(--bg-dark-2);
+
+  /* Shadows are orange-tinted, never neutral gray. A gray shadow on this
+     warm canvas reads as dirt rather than depth. */
+  --shadow-sm: 0 2px 10px -4px rgba(217, 56, 30, 0.14);
+  --shadow-md: 0 12px 34px -14px rgba(217, 56, 30, 0.22);
+  --shadow-lg: 0 26px 70px -28px rgba(217, 56, 30, 0.34);
+
+  --ease-brand: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Mirror the tokens into Tailwind v4's theme so they exist as utilities
+   (bg-canvas, text-accent, border-border, …). */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Palette names — bg-accent-orange, text-text-muted, border-border-subtle … */
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-amber: var(--accent-amber);
+  --color-accent-red: var(--accent-red);
+  --color-accent-tint: var(--accent-tint);
+  --color-accent-tint-2: var(--accent-tint-2);
+
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-dark: var(--bg-dark);
+  --color-bg-dark-2: var(--bg-dark-2);
+  --color-bg-dark-3: var(--bg-dark-3);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-faint: var(--text-faint);
+  --color-text-on-dark: var(--text-on-dark);
+  --color-text-on-dark-muted: var(--text-on-dark-muted);
+
+  --color-border-subtle: var(--border-subtle);
+
+  /* Semantic aliases the components are written against. */
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-light: var(--accent-light);
+  --color-accent-glow: var(--accent-glow);
+
+  --color-canvas: var(--canvas);
+  --color-canvas-alt: var(--canvas-alt);
+  --color-canvas-deep: var(--canvas-deep);
+  --color-surface: var(--surface);
+  --color-surface-tint: var(--surface-tint);
+
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-muted: var(--text-muted);
+  --color-text-dim: var(--text-dim);
+  --color-text-disabled: var(--text-disabled);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+
+  --font-sans: var(--font-sans-brand);
+  --font-mono: var(--font-mono-brand);
+  --font-script: var(--font-script-brand);
+  --font-hand: var(--font-hand-brand);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ---------------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------------ */
+html {
+  /* `overflow-x: clip` on <html>, NOT `overflow-x: hidden` on <body>.
+     `hidden` turns the element into a scroll container, which silently breaks
+     `position: sticky` for the pinned service-stack and workflow sections.
+     `clip` suppresses horizontal overflow without creating that container. */
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--canvas);
+  color: var(--text);
+  font-family: var(--font-sans-brand), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+button:not(:disabled),
+a[href],
+[role="button"] {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-deep);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Orange gradient scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-light) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--canvas-alt);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--accent), var(--accent-deep));
+  border-radius: 999px;
+  border: 2px solid var(--canvas-alt);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-deep);
+}
+
+/* ---------------------------------------------------------------------------
+   Utilities
+   ------------------------------------------------------------------------ */
+@utility container-x {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (min-width: 640px) {
+    padding-inline: 2rem;
+  }
+  @media (min-width: 1024px) {
+    padding-inline: 2.5rem;
+  }
+}
+
+@utility card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.5s var(--ease-brand),
+    box-shadow 0.5s var(--ease-brand),
+    border-color 0.5s var(--ease-brand);
+}
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  border: 1px solid rgba(228, 224, 216, 0.9); /* --border-subtle at 90% */
+  box-shadow: var(--shadow-md);
+}
+
+@utility btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  border-radius: 999px;
+  padding: 0.95rem 1.9rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  color: #fff;
+  /* White on --accent-orange is only 3.12:1. The gradient is anchored in
+     --bg-dark at the text-bearing edge and stops at --accent-red (4.63:1 with
+     white) rather than running out to orange, so the label always sits on a
+     passing stop. */
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--accent-red) 72%, #e8481f 100%);
+  box-shadow: var(--shadow-md);
+  transition:
+    transform 0.4s var(--ease-brand),
+    box-shadow 0.4s var(--ease-brand);
+
+  /* Sheen — a single pass sweeping across the pill on hover. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.32) 48%,
+      transparent 76%
+    );
+    transform: translateX(-110%);
+    transition: transform 0.75s var(--ease-brand);
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  &:hover::after {
+    transform: translateX(110%);
+  }
+}
+
+@utility btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.95rem 1.9rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  transition:
+    transform 0.4s var(--ease-brand),
+    border-color 0.4s var(--ease-brand),
+    box-shadow 0.4s var(--ease-brand);
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+@utility grid-lines {
+  background-image:
+    linear-gradient(to right, rgba(255, 90, 31, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 90, 31, 0.08) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+@utility noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@utility text-gradient {
+  background: linear-gradient(105deg, var(--accent-red) 0%, var(--accent-orange) 52%, var(--accent-amber) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+@utility tone-dim {
+  color: var(--text-dim);
+}
+
+/* ---------------------------------------------------------------------------
+   Keyframes
+   ------------------------------------------------------------------------ */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.14);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* -50% lands exactly on the seam because the track is rendered twice. */
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes streak-fall {
+  from {
+    transform: translateY(-50%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes ping-dot {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  75%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 9s var(--ease-brand) infinite;
+}
+.animate-marquee {
+  animation: marquee 42s linear infinite;
+}
+.animate-ping-dot {
+  animation: ping-dot 2s var(--ease-brand) infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion
+   ------------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* `animation-iteration-count: 1` is WRONG for looping drift animations —
+     a marquee or falling streak plays its single pass and then freezes
+     mid-travel, leaving the layout visibly half-scrolled. Those need the
+     animation removed outright so the element rests at its authored position. */
+  .animate-marquee,
+  .animate-pulse-glow,
+  .animate-ping-dot,
+  .streak-layer {
+    animation: none !important;
+  }
 }
