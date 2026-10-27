@@ -16,7 +16,7 @@ export const SITE_URL = (
 export const SITE_NAME = "2wayclick";
 export const SITE_TAGLINE = "Software development agency";
 
-export const CONTACT_EMAIL = "hello@2wayclick.com";
+export const CONTACT_EMAIL = "info@2wayclick.com";
 export const X_HANDLE = "@2wayclick";
 
 export const SITE_DESCRIPTION =

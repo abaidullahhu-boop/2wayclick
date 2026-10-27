@@ -114,9 +114,13 @@ export function Footer() {
         {/* Oversized script wordmark. The script face has long ascenders and
             descenders, so `leading-[0.8]` clipped them against the row above
             and below — the padding plus a taller line-height gives the strokes
-            room instead of cropping them. */}
-        <div aria-hidden="true" className="mt-14 overflow-hidden py-4">
-          <span className="block select-none bg-linear-to-b from-accent-light/70 to-accent-tint/40 bg-clip-text text-center text-[20vw] leading-[1.15] text-transparent font-script">
+            room instead of cropping them.
+            Sized in `cqw`, not `vw`: the container caps at 1240px, so a vw size
+            kept growing on wide screens and clipped the final "k". Sacramento's
+            ink runs ~3.37× the font size for this word, so 26cqw fills ~88%
+            of the row at every width. */}
+        <div aria-hidden="true" className="@container mt-14 overflow-hidden py-4">
+          <span className="block select-none bg-linear-to-b from-accent-light/70 to-accent-tint/40 bg-clip-text text-center text-[26cqw] leading-[1.15] text-transparent font-script">
             {SITE_NAME}
           </span>
         </div>

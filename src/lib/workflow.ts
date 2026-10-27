@@ -1,6 +1,7 @@
 /**
- * The six phases of a software engagement, rendered by the scroll-pinned
- * workflow section. Scroll position is the sole driver of the active step.
+ * The six phases of a software engagement, rendered as a converging flow
+ * chart by the workflow section. How phases group into stages lives in
+ * `WORKFLOW_GROUPS` so the step data stays a flat, source-ordered list.
  */
 
 export type WorkflowStep = {
@@ -94,4 +95,14 @@ export const WORKFLOW_STEPS: readonly WorkflowStep[] = [
       "Retainer or clean exit — your call",
     ],
   },
+];
+
+/** Stages the chart merges phases into, in order, before the final hub. */
+export const WORKFLOW_GROUPS: readonly {
+  label: string;
+  steps: readonly [string, string];
+}[] = [
+  { label: "Plan", steps: ["discovery", "architecture"] },
+  { label: "Build", steps: ["design", "development"] },
+  { label: "Ship", steps: ["qa-launch", "support"] },
 ];

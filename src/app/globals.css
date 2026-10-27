@@ -348,12 +348,64 @@ a[href],
   }
 }
 
-@keyframes streak-fall {
+/* The wrapper is as tall as the star field, so 100% is one full traversal.
+   The fall occupies the first 38% of the cycle; the rest is the gap before
+   that star streaks again, which keeps the sky from ever looking busy. */
+@keyframes star-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  4%,
+  28% {
+    opacity: 1;
+  }
+  38%,
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Travel takes the first third of the cycle; each connector level is delayed
+   by one third, so a pulse hands off leaf → stage → hub without a gap. */
+@keyframes flow-pulse {
+  0% {
+    stroke-dashoffset: 0.1;
+  }
+  33.33%,
+  100% {
+    stroke-dashoffset: -1.05;
+  }
+}
+
+@keyframes flow-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+@keyframes flow-progress {
   from {
-    transform: translateY(-50%);
+    transform: scaleX(0);
   }
   to {
-    transform: translateY(0);
+    transform: scaleX(1);
+  }
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.9;
   }
 }
 
@@ -379,6 +431,99 @@ a[href],
   animation: ping-dot 2s var(--ease-brand) infinite;
 }
 
+/* Falling star: a 1–2px wide wrapper the height of the field, translated by
+   its own height. The tail hangs above the wrapper's top edge, the glowing
+   head sits on it. Narrow wrappers keep each composited layer tiny. */
+.falling-star {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: var(--size);
+  animation: star-fall var(--duration) linear var(--delay) infinite;
+  will-change: transform, opacity;
+}
+.falling-star::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  width: 100%;
+  height: var(--length);
+  border-radius: 999px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(253, 186, 116, 0.35) 60%,
+    rgba(255, 237, 213, 0.95)
+  );
+}
+.falling-star::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: calc(var(--size) * 2.2);
+  height: calc(var(--size) * 2.2);
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  box-shadow:
+    0 0 6px 2px rgba(255, 237, 213, 0.9),
+    0 0 14px 4px rgba(253, 186, 116, 0.55);
+}
+
+/* ---- Process flow chart ---- */
+
+/* The active phase's route, cross-faded over the base wiring. */
+.flow-route {
+  fill: none;
+  stroke: url(#flow-hot);
+  stroke-width: 1.75;
+  opacity: 0;
+  transition: opacity 0.7s var(--ease-brand);
+}
+.flow-route[data-on] {
+  opacity: 1;
+}
+
+/* A short glowing dash on a `pathLength="1"` path. The offset starts the
+   dash fully before the path and ends it fully past it, so a round cap never
+   leaves a resting dot at either end. */
+.flow-pulse {
+  fill: none;
+  stroke: var(--accent-amber);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 0.06 2;
+  stroke-dashoffset: 0.1;
+  filter: drop-shadow(0 0 4px rgba(255, 90, 31, 0.9));
+  animation: flow-pulse 3.3s ease-in-out infinite backwards;
+}
+
+.flow-ripple {
+  animation: flow-ripple 3.2s var(--ease-brand) infinite;
+}
+
+.flow-progress {
+  transform-origin: left;
+  animation-name: flow-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.flow-paused .flow-pulse,
+.flow-paused .flow-ripple {
+  animation-play-state: paused;
+}
+
+.twinkle-star {
+  position: absolute;
+  border-radius: 999px;
+  background: #fff7ed;
+  box-shadow: 0 0 4px rgba(253, 186, 116, 0.8);
+  animation: star-twinkle var(--duration) ease-in-out var(--delay) infinite;
+}
+
 /* ---------------------------------------------------------------------------
    Reduced motion
    ------------------------------------------------------------------------ */
@@ -393,13 +538,20 @@ a[href],
   }
 
   /* `animation-iteration-count: 1` is WRONG for looping drift animations —
-     a marquee or falling streak plays its single pass and then freezes
+     a marquee or falling star plays its single pass and then freezes
      mid-travel, leaving the layout visibly half-scrolled. Those need the
      animation removed outright so the element rests at its authored position. */
   .animate-marquee,
   .animate-pulse-glow,
   .animate-ping-dot,
-  .streak-layer {
+  .twinkle-star {
     animation: none !important;
+  }
+  /* A frozen meteor reads as a stray line, so hide them; the static star
+     field stays. */
+  .falling-star,
+  .flow-pulse,
+  .flow-ripple {
+    display: none;
   }
 }

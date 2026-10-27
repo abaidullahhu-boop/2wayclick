@@ -125,3 +125,61 @@ export function DribbbleIcon(props: IconProps) {
     </svg>
   );
 }
+
+/* ---- Process phase icons ---- */
+
+export function SearchIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m20 20-4.2-4.2" />
+    </svg>
+  );
+}
+
+export function LayersIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+      <path d="m3 13 9 5 9-5" />
+    </svg>
+  );
+}
+
+export function PenIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M4 20l1.2-4.6L15.6 5a2 2 0 0 1 2.8 0l.6.6a2 2 0 0 1 0 2.8L8.6 18.8 4 20Z" />
+      <path d="m13.5 7 3.5 3.5" />
+    </svg>
+  );
+}
+
+export function CodeIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16" />
+    </svg>
+  );
+}
+
+export function RocketIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M12 15c3.9-2 7-6.2 7-11-4.8 0-9 3.1-11 7l4 4Z" />
+      <path d="M8 11H4.5L7 8h3.5M13 16v3.5l3-2.5v-3.5" />
+      <path d="M6.5 17.5c-1.2.4-2 1.6-2 3 1.4 0 2.6-.8 3-2" />
+      <circle cx="14.5" cy="9.5" r="1.3" />
+    </svg>
+  );
+}
+
+export function LifebuoyIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="12" r="3.5" />
+      <path d="m6 6 3.5 3.5M14.5 14.5 18 18M18 6l-3.5 3.5M9.5 14.5 6 18" />
+    </svg>
+  );
+}

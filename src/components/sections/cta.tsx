@@ -24,20 +24,42 @@ const REASONS = [
 ] as const;
 
 /**
- * Falling light streaks.
- *
- * Durations are mutually non-divisible (7 / 11 / 17) so the three layers never
- * re-align into a visible repeating pattern. With 6/12/18 the layers would
- * resync every 18 seconds and the eye picks that up immediately.
- *
- * Each layer is drawn at 200% height with the pattern tiled twice, so the
- * -50% translate in `streak-fall` lands exactly on the seam.
+ * Seeded PRNG (mulberry32). The star field must be identical on the server
+ * and the client — `Math.random()` here would be a hydration mismatch.
  */
-const STREAK_TIERS = [
-  { duration: "7s", opacity: 0.5, width: "1px", gap: "120px" },
-  { duration: "11s", opacity: 0.32, width: "1.5px", gap: "190px" },
-  { duration: "17s", opacity: 0.22, width: "1px", gap: "260px" },
-] as const;
+function seeded(seed: number) {
+  let t = seed;
+  return () => {
+    t = (t + 0x6d2b79f5) | 0;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const round = (n: number) => Math.round(n * 100) / 100;
+const rand = seeded(2026);
+
+/**
+ * Falling stars. Delays are negative so the shower is already mid-flight on
+ * first paint instead of every star launching together. Durations vary
+ * enough that no two stars stay in step.
+ */
+const FALLING_STARS = Array.from({ length: 22 }, () => ({
+  left: round(rand() * 100),
+  size: round(1 + rand() * 1),
+  length: Math.round(70 + rand() * 110),
+  duration: round(6 + rand() * 8),
+  delay: round(-rand() * 14),
+}));
+
+const TWINKLE_STARS = Array.from({ length: 48 }, () => ({
+  left: round(rand() * 100),
+  top: round(rand() * 100),
+  size: round(1 + rand() * 1.6),
+  duration: round(2.5 + rand() * 4.5),
+  delay: round(-rand() * 7),
+}));
 
 export function Cta() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -79,23 +101,44 @@ export function Cta() {
             className="absolute inset-0 bg-linear-to-b from-ink/92 via-ink/78 to-ink/55"
           />
 
-          {/* Streak layers */}
+          {/* Star field */}
           <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-            {STREAK_TIERS.map((tier) => (
-              <div
-                key={tier.duration}
-                className="streak-layer absolute inset-x-0 top-0 h-[200%]"
-                style={{
-                  opacity: tier.opacity,
-                  animation: `streak-fall ${tier.duration} linear infinite`,
-                  backgroundImage: `repeating-linear-gradient(to right, transparent 0, transparent ${tier.gap}, rgba(253,186,116,0.9) ${tier.gap}, rgba(253,186,116,0.9) calc(${tier.gap} + ${tier.width}), transparent calc(${tier.gap} + ${tier.width}), transparent calc(${tier.gap} * 2))`,
-                  maskImage:
-                    "linear-gradient(to bottom, transparent, black 18%, black 82%, transparent)",
-                  WebkitMaskImage:
-                    "linear-gradient(to bottom, transparent, black 18%, black 82%, transparent)",
-                }}
+            {TWINKLE_STARS.map((star, index) => (
+              <span
+                key={index}
+                className="twinkle-star"
+                style={
+                  {
+                    left: `${star.left}%`,
+                    top: `${star.top}%`,
+                    width: `${star.size}px`,
+                    height: `${star.size}px`,
+                    "--duration": `${star.duration}s`,
+                    "--delay": `${star.delay}s`,
+                  } as React.CSSProperties
+                }
               />
             ))}
+
+            {/* Oversized and tilted so the diagonal fall still covers the
+                panel's corners. */}
+            <div className="absolute -inset-[25%] rotate-[22deg]">
+              {FALLING_STARS.map((star, index) => (
+                <span
+                  key={index}
+                  className="falling-star"
+                  style={
+                    {
+                      left: `${star.left}%`,
+                      "--size": `${star.size}px`,
+                      "--length": `${star.length}px`,
+                      "--duration": `${star.duration}s`,
+                      "--delay": `${star.delay}s`,
+                    } as React.CSSProperties
+                  }
+                />
+              ))}
+            </div>
           </div>
 
           <div className="relative mx-auto max-w-3xl text-center">
